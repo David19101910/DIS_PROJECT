@@ -86,9 +86,9 @@ The ingester connects to aisstream.io and continuously receives live AIS positio
 
 # Search for vessels
 Use the search bar at the top to search by:
-- **Vessel name** — e.g. `KARTHA`, `TANGO`, `NORD`
-- **MMSI number** — exactly 9 digits, e.g. `518100626`
-- **IMO number** — e.g. `IMO9292211`
+- **Vessel name** - e.g. `KARTHA`, `TANGO`, `NORD`
+- **MMSI number** - exactly 9 digits, e.g. `518100626`
+- **IMO number** - e.g. `IMO9292211`
 
 The app uses regex to automatically detect whether the input is an MMSI, IMO, or name.
 
@@ -116,16 +116,16 @@ Under **Profile**, enter a new password and click **Update**.
 
 The database consists of 9 tables:
 
-- **vessel** — core vessel entity
-- **vessel_type** — lookup table
-- **position** — AIS position
-- **ais_gap** — detected dark periods
-- **flag_change** — logged flag changes
-- **sanction_entry** — entries from sanctions lists
-- **vessel_sanction** — many-to-many link between vessels and sanctions
-- **suspicion_event** — individual events giving risks score
-- **users** — registered users
-- **favorites** — user-saved vessels ( weak entity )
+- **vessel** - core vessel entity
+- **vessel_type** - lookup table
+- **position** - AIS position
+- **ais_gap** - detected dark periods
+- **flag_change** - logged flag changes
+- **sanction_entry** - entries from sanctions lists
+- **vessel_sanction** - many-to-many link between vessels and sanctions
+- **suspicion_event** - individual events giving risks score
+- **users** - registered users
+- **favorites** - user-saved vessels ( weak entity )
 
 ---
 
