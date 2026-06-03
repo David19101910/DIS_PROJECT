@@ -6,8 +6,7 @@ DarkFleet is a real-time web application for tracking sanctioned vessels, shadow
 # Prerequisites
 
 - Python
-- PostgreSQL 14 or newer
-- An aisstream.io API key (already configured in ingester.py)
+- PostgreSQL
 
 # Setup Instructions
 
