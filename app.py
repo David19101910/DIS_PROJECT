@@ -15,7 +15,7 @@ bcrypt = Bcrypt(app)
 DB_CONFIG = {
     "dbname": "darkfleet",
     "user": "postgres",
-    "password": "Ostenfeld35",
+    "password": "YOUR_PASSWORD",
     "host":   "localhost",
     "port": 5432,
 }
