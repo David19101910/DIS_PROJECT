@@ -1,6 +1,6 @@
 # DarkFleet - Maritime Sanctions Intelligence
 
-DarkFleet is a real-time web application for tracking sanctioned vessels, shadow fleet tankers, and oligarch superyachts. It connects to live AIS data streams and cross-references vessel positions with OFAC, EU, and UK sanctions lists.
+DarkFleet is a real-time web application for tracking sanctioned vessels, shadow fleet tankers, and oligarch superyachts.
 
 BEFORE FOLLOWING THIS GUIDE: GO DOWN TO POINT 6 AND CONFIGURE DATABASE CREDENTIALS
 
