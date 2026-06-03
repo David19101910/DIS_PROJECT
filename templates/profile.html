@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Profil — DarkFleet{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <h1>{{ session.username }}</h1>
+    <p>Your DarkFleet profile</p>
+</div>
+
+<div style="display:grid; grid-template-columns:2fr 1fr; gap:1.5rem;">
+
+    <!-- Favoritter -->
+    <div class="card">
+        <div class="card-header">★ Saved vessels ({{ favorites|length }})</div>
+        {% if favorites %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Navn</th>
+                    <th>MMSI</th>
+                    <th>Flag</th>
+                    <th>Score</th>
+                    <th>Risiko</th>
+                    <th>Saved</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for f in favorites %}
+                <tr>
+                    <td><a href="/vessel/{{ f.id }}">{{ f.name or '—' }}</a></td>
+                    <td><span class="mmsi">{{ f.mmsi or '—' }}</span></td>
+                    <td><span class="flag">{{ f.current_flag or '??' }}</span></td>
+                    <td><span class="score">{{ f.total_score or 0 }}</span></td>
+                    <td>
+                        {% set rl = f.risk_level or 'CLEAN' %}
+                        <span class="risk risk-{{ rl.split()[0] }}">{{ rl }}</span>
+                    </td>
+                    <td style="font-family:var(--mono); font-size:0.75rem; color:var(--muted);">
+                        {{ f.saved_at.strftime('%d/%m/%Y') if f.saved_at else '' }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p style="color:var(--muted); font-family:var(--mono); font-size:0.8rem; padding:1rem 0;">
+                No saved vessels yet.<br>
+                <a href="/" style="color:var(--accent);">Search for vessels →</a>
+            </p>
+        {% endif %}
+    </div>
+
+    <!-- Change password -->
+    <div class="card">
+        <div class="card-header">Change password</div>
+        <form method="post" action="/profile/update">
+            <div class="form-group">
+                <label>New password</label>
+                <input type="password" name="new_password" autocomplete="new-password">
+            </div>
+            <button class="btn btn-primary" type="submit" style="width:100%">Update</button>
+        </form>
+        <div style="margin-top:2rem; padding-top:1rem; border-top:1px solid var(--border);">
+            <a href="/logout" class="btn btn-danger" style="width:100%; display:block; text-align:center;">Log out</a>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

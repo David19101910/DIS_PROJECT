@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}{{ v.name or v.mmsi }} — DarkFleet{% endblock %}
+{% block content %}
+
+{% set rl = v.risk_level or 'CLEAN' %}
+{% set rl_key = rl.split()[0] %}
+
+<!-- Header -->
+<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:2rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border);">
+    <div>
+        <div style="font-family:var(--mono); font-size:0.7rem; color:var(--muted); letter-spacing:3px; margin-bottom:0.5rem;">
+            ▸ VESSEL INTELLIGENCE REPORT
+        </div>
+        <h1 style="font-size:3rem; font-weight:900; letter-spacing:2px; text-transform:uppercase; line-height:1;">
+            {{ v.name or '—' }}
+        </h1>
+        <div style="margin-top:0.75rem; display:flex; gap:1rem; align-items:center;">
+            <span class="mmsi">MMSI {{ v.mmsi or '—' }}</span>
+            <span class="mmsi">{{ v.imo_number or '' }}</span>
+            <span class="flag">{{ v.current_flag or '??' }}</span>
+            <span class="risk risk-{{ rl_key }}">{{ rl }}</span>
+            <span style="font-family:var(--mono); font-size:0.9rem; color:var(--danger);">
+                SCORE: {{ v.total_score or 0 }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Favorit knap -->
+    <div>
+        {% if session.username %}
+            {% if is_favorite %}
+            <form method="post" action="/favorite/remove/{{ v.id }}">
+                <button class="btn btn-danger" type="submit">★ Remove favorite</button>
+            </form>
+            {% else %}
+            <form method="post" action="/favorite/add/{{ v.id }}">
+                <button class="btn" type="submit">☆ Save as favorite</button>
+            </form>
+            {% endif %}
+        {% else %}
+            <a href="/login" class="btn">☆ Log in to save</a>
+        {% endif %}
+    </div>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+
+    <!-- Basisinfo -->
+    <div class="card">
+        <div class="card-header">Vessel Info</div>
+        <table>
+            <tr><td style="color:var(--muted); width:40%">Type</td><td>{{ v.type_name or '—' }}</td></tr>
+            <tr><td style="color:var(--muted)">Owner</td><td>{{ v.owner or '—' }}</td></tr>
+            <tr><td style="color:var(--muted)">Flag</td><td><span class="flag">{{ v.current_flag or '??' }}</span></td></tr>
+            <tr><td style="color:var(--muted)">MMSI</td><td><span class="mmsi">{{ v.mmsi or '—' }}</span></td></tr>
+            <tr><td style="color:var(--muted)">IMO</td><td><span class="mmsi">{{ v.imo_number or '—' }}</span></td></tr>
+        </table>
+    </div>
+
+    <!-- Sanctions -->
+    <div class="card">
+        <div class="card-header">⚠ Sanctions ({{ sanctions|length }})</div>
+        {% if sanctions %}
+            {% for s in sanctions %}
+            <div style="padding:0.5rem 0; border-bottom:1px solid var(--border);">
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="font-weight:700; color:var(--danger);">{{ s.list_source }}</span>
+                    {% if s.listed_since %}<span style="font-family:var(--mono); font-size:0.75rem; color:var(--muted);">{{ s.listed_since }}</span>{% endif %}
+                </div>
+                {% if s.reason %}
+                <div style="font-size:0.8rem; color:var(--muted); margin-top:0.2rem;">{{ s.reason[:120] }}{% if s.reason|length > 120 %}...{% endif %}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color:var(--muted); font-family:var(--mono); font-size:0.8rem;">No sanctions registered</p>
+        {% endif %}
+    </div>
+
+    <!-- Latest positions -->
+    <div class="card">
+        <div class="card-header"><span class="live-dot"></span>Latest positions ({{ positions|length }})</div>
+        {% if positions %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Tid</th>
+                    <th>Lat</th>
+                    <th>Lon</th>
+                    <th>Knob</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in positions %}
+                <tr>
+                    <td style="font-family:var(--mono); font-size:0.75rem; color:var(--muted);">{{ p.recorded_at.strftime('%d/%m %H:%M') if p.recorded_at else '—' }}</td>
+                    <td style="font-family:var(--mono); font-size:0.8rem;">{{ "%.4f"|format(p.latitude) }}</td>
+                    <td style="font-family:var(--mono); font-size:0.8rem;">{{ "%.4f"|format(p.longitude) }}</td>
+                    <td style="font-family:var(--mono); font-size:0.8rem; color:var(--accent);">{{ "%.1f"|format(p.speed_knots) if p.speed_knots else '0.0' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p style="color:var(--muted); font-family:var(--mono); font-size:0.8rem;">No positions collected yet</p>
+        {% endif %}
+    </div>
+
+    <!-- AIS Gaps -->
+    <div class="card">
+        <div class="card-header">⚡ AIS Gaps ({{ gaps|length }})</div>
+        {% if gaps %}
+            {% for g in gaps %}
+            <div style="padding:0.6rem 0; border-bottom:1px solid var(--border);">
+                <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;">
+                    <span style="color:var(--warn); font-weight:700; font-family:var(--mono);">{{ "%.1f"|format(g.gap_hours) }} TIMER</span>
+                    <span style="font-family:var(--mono); font-size:0.7rem; color:var(--muted);">{{ g.gap_start.strftime('%d/%m/%Y') if g.gap_start else '' }}</span>
+                </div>
+                <div style="font-family:var(--mono); font-size:0.7rem; color:var(--muted);">
+                    Disappeared: {{ "%.3f"|format(g.last_lat) }}, {{ "%.3f"|format(g.last_lon) }} →
+                    Reappeared: {{ "%.3f"|format(g.reappear_lat) }}, {{ "%.3f"|format(g.reappear_lon) }}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color:var(--muted); font-family:var(--mono); font-size:0.8rem;">No AIS gaps detected</p>
+        {% endif %}
+    </div>
+
+    <!-- Flag ændringer -->
+    {% if flag_changes %}
+    <div class="card">
+        <div class="card-header">🚩 Flag changes ({{ flag_changes|length }})</div>
+        {% for f in flag_changes %}
+        <div style="padding:0.5rem 0; border-bottom:1px solid var(--border); font-family:var(--mono); font-size:0.85rem;">
+            <span class="flag">{{ f.flag_from }}</span>
+            <span style="color:var(--muted); margin:0 0.5rem;">→</span>
+            <span class="flag" style="border-color:var(--warn); color:var(--warn);">{{ f.flag_to }}</span>
+            <span style="color:var(--muted); font-size:0.7rem; margin-left:1rem;">{{ f.changed_at.strftime('%d/%m/%Y') if f.changed_at else '' }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Suspicion events -->
+    {% if events %}
+    <div class="card">
+        <div class="card-header">🔍 Suspicion events</div>
+        {% for e in events %}
+        <div style="padding:0.5rem 0; border-bottom:1px solid var(--border);">
+            <div style="display:flex; justify-content:space-between;">
+                <span style="font-family:var(--mono); font-size:0.8rem; color:var(--warn);">{{ e.rule_name }}</span>
+                <span style="font-family:var(--mono); font-size:0.8rem; color:var(--danger);">+{{ e.weight }}</span>
+            </div>
+            {% if e.description %}
+            <div style="font-size:0.8rem; color:var(--muted); margin-top:0.2rem;">{{ e.description }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

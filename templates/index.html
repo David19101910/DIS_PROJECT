@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}DarkFleet — Shadow Fleet Tracker{% endblock %}
+{% block content %}
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:3rem; margin-bottom:3rem; padding-top:1rem;">
+    <div>
+        <div style="font-family:var(--mono); font-size:0.7rem; color:var(--muted); letter-spacing:3px; margin-bottom:1rem;">
+            ▸ MARITIME SANCTIONS INTELLIGENCE
+        </div>
+        <h1 style="font-size:4rem; font-weight:900; line-height:0.9; letter-spacing:2px; text-transform:uppercase; margin-bottom:1.5rem;">
+            DARK<br><span style="color:var(--accent)">FLEET</span>
+        </h1>
+        <p style="color:var(--muted); font-size:1rem; line-height:1.6; max-width:400px; margin-bottom:2rem;">
+            Real-time tracking of sanctioned vessels. Shadow fleet, oligarch yachts and sanctions evaders — monitored live via AIS.
+        </p>
+        <div style="display:flex; gap:3rem;">
+            <div>
+                <div style="font-family:var(--mono); font-size:2rem; color:var(--accent);">{{ vessel_count }}</div>
+                <div style="font-size:0.7rem; letter-spacing:2px; color:var(--muted); text-transform:uppercase;">Sanctioned vessels</div>
+            </div>
+            <div>
+                <div style="font-family:var(--mono); font-size:2rem; color:var(--clean);">{{ position_count }}</div>
+                <div style="font-size:0.7rem; letter-spacing:2px; color:var(--muted); text-transform:uppercase;">Positions collected</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live feed -->
+    <div class="card">
+        <div class="card-header">
+            <span class="live-dot"></span>Live AIS feed
+        </div>
+        {% if live_positions %}
+            {% for p in live_positions %}
+            <div style="display:flex; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid rgba(26,42,58,0.5);">
+                <div>
+                    <div style="font-weight:700; font-size:0.9rem;">{{ p.name or '—' }}</div>
+                    <div style="font-family:var(--mono); font-size:0.7rem; color:var(--muted);">
+                        {{ "%.4f"|format(p.latitude) }}, {{ "%.4f"|format(p.longitude) }}
+                    </div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-family:var(--mono); font-size:0.85rem; color:var(--accent);">
+                        {% if p.speed_knots %}{{ "%.1f"|format(p.speed_knots) }} kn{% else %}ANKER{% endif %}
+                    </div>
+                    <div style="font-family:var(--mono); font-size:0.65rem; color:var(--muted);">
+                        {{ p.recorded_at.strftime('%H:%M:%S') if p.recorded_at else '' }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color:var(--muted); font-family:var(--mono); font-size:0.8rem;">No live positions yet — run ingester.py</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Top risiko skibe -->
+<div class="card">
+    <div class="card-header">⚠ Highest risk — sanctioned vessels</div>
+    {% if top_vessels %}
+    <table>
+        <thead>
+            <tr>
+                <th>Navn</th>
+                <th>MMSI</th>
+                <th>Flag</th>
+                <th>Score</th>
+                <th>Risiko</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for v in top_vessels %}
+            <tr>
+                <td><a href="/vessel/{{ v.vessel_id }}">{{ v.name or '—' }}</a></td>
+                <td><span class="mmsi">{{ v.mmsi or '—' }}</span></td>
+                <td><span class="flag">{{ v.current_flag or '??' }}</span></td>
+                <td><span class="score" style="color:var(--danger)">{{ v.total_score }}</span></td>
+                <td>
+                    {% set rl = v.risk_level or 'CLEAN' %}
+                    <span class="risk risk-{{ rl.split()[0] }}">{{ rl }}</span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p style="color:var(--muted); font-family:var(--mono); font-size:0.8rem; padding:1rem 0;">No suspicion events yet.</p>
+    {% endif %}
+</div>
+
+{% endblock %}

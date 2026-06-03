@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Søg — DarkFleet{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <h1>Search Results</h1>
+    <p>
+        {{ count }} result(s) for "<span style="color:var(--accent)">{{ query }}</span>"
+        — type: {{ search_type.upper() }}
+    </p>
+</div>
+
+{% if results %}
+<div class="card">
+    <table>
+        <thead>
+            <tr>
+                <th>Navn</th>
+                <th>MMSI</th>
+                <th>IMO</th>
+                <th>Flag</th>
+                <th>Score</th>
+                <th>Risiko</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for v in results %}
+            <tr>
+                <td><a href="/vessel/{{ v.id }}">{{ v.name or '—' }}</a></td>
+                <td><span class="mmsi">{{ v.mmsi or '—' }}</span></td>
+                <td><span class="mmsi">{{ v.imo_number or '—' }}</span></td>
+                <td><span class="flag">{{ v.current_flag or '??' }}</span></td>
+                <td><span class="score">{{ v.total_score or 0 }}</span></td>
+                <td>
+                    {% set rl = v.risk_level or 'CLEAN' %}
+                    <span class="risk risk-{{ rl.split()[0] }}">{{ rl }}</span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card">
+    <p style="color:var(--muted); font-family:var(--mono); padding:1rem 0;">
+        No vessels found for "{{ query }}"
+    </p>
+</div>
+{% endif %}
+
+{% endblock %}
