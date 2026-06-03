@@ -17,7 +17,7 @@ AIS_API_KEY = "6181da28b1565cf456e5862266dd882e1307194e"
 DB_CONFIG = {
     "dbname":   "darkfleet",
     "user":     "postgres",
-    "password": "Ostenfeld35",
+    "password": "YOUR_PASSWORD",
     "host":     "localhost",
     "port":     5432,
 }
